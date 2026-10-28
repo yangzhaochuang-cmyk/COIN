@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>放纵餐决策币</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="决策币">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#eef1ee">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@700;900&family=Noto+Sans+SC:wght@400;500;700&display=swap">
+<style>
+/* Layout: single centered column — coin stage, verdict card, rules, history log */
+:root{
+  --bg:#eef1ee; --surface:#ffffff; --ink:#1d2621; --muted:#5f6b64; --line:#d5dcd7;
+  --brass:#c08a2e; --brass-hi:#e9c477; --brass-lo:#8a5f17;
+  --yes:#b5532b; --no:#2f6b4f;
+  --display:"Noto Serif SC","Songti SC",serif;
+  --body:"Noto Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141a17; --surface:#1d2521; --ink:#e7ece9; --muted:#9aa69f; --line:#2f3a34;
+  --brass:#d29c3d; --brass-hi:#f0cf86; --brass-lo:#8f6420;
+  --yes:#e07a4f; --no:#5fae86; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141a17; --surface:#1d2521; --ink:#e7ece9; --muted:#9aa69f; --line:#2f3a34;
+  --brass:#d29c3d; --brass-hi:#f0cf86; --brass-lo:#8f6420;
+  --yes:#e07a4f; --no:#5fae86; color-scheme:dark}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);line-height:1.6}
+.wrap{max-width:520px;margin:0 auto;padding-block:28px 48px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  display:flex;flex-direction:column;gap:22px}
+h1{font-family:var(--display);font-weight:900;font-size:1.9rem;margin:0;text-wrap:balance;letter-spacing:.02em}
+.sub{color:var(--muted);margin:2px 0 0;font-size:.95rem}
+.stage{display:flex;flex-direction:column;align-items:center;gap:18px;padding-block:10px}
+.coin{width:180px;height:180px;max-width:100%;position:relative;transform-style:preserve-3d;
+  transition:transform 1.6s cubic-bezier(.2,.7,.2,1)}
+.face{position:absolute;inset:0;border-radius:50%;backface-visibility:hidden;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  background:radial-gradient(circle at 35% 30%,var(--brass-hi),var(--brass) 55%,var(--brass-lo));
+  box-shadow:inset 0 0 0 7px var(--brass-lo),inset 0 0 0 10px var(--brass-hi),0 10px 24px rgba(0,0,0,.18);
+  color:#2b1c05;font-family:var(--display)}
+.face b{font-size:2.6rem;font-weight:900;letter-spacing:.06em;line-height:1}
+.face span{font-size:.85rem;font-weight:700;margin-top:6px;letter-spacing:.2em}
+.back{transform:rotateY(180deg)}
+button{font:inherit;cursor:pointer}
+.flip{background:var(--ink);color:var(--bg);border:0;border-radius:999px;padding:12px 34px;font-weight:700;font-size:1.05rem}
+.flip:disabled{background:var(--line);color:var(--muted);cursor:not-allowed}
+.flip:focus-visible,.ghost:focus-visible{outline:3px solid var(--brass);outline-offset:3px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px 20px;display:flex;flex-direction:column;gap:8px}
+.verdict{border-left:5px solid var(--line)}
+.verdict.yes{border-left-color:var(--yes)} .verdict.no{border-left-color:var(--no)}
+.verdict h2{margin:0;font-family:var(--display);font-size:1.3rem}
+.verdict.yes h2{color:var(--yes)} .verdict.no h2{color:var(--no)}
+.verdict p{margin:0}
+.lock{font-variant-numeric:tabular-nums;color:var(--muted);font-size:.92rem}
+.label{font-size:.75rem;letter-spacing:.14em;color:var(--muted);font-weight:700}
+.rules{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:0}
+.rules dt{font-weight:700} .rules dd{margin:0;color:var(--muted)}
+.rules .y{color:var(--yes)} .rules .n{color:var(--no)}
+ul{margin:0;padding-left:1.2em;color:var(--muted)} li{margin:2px 0}
+.log{list-style:none;padding:0;display:flex;flex-direction:column;gap:6px;font-variant-numeric:tabular-nums}
+.log li{display:flex;justify-content:space-between;gap:10px;border-bottom:1px dashed var(--line);padding-bottom:6px;color:var(--ink)}
+.tag{font-weight:700} .tag.yes{color:var(--yes)} .tag.no{color:var(--no)}
+.ghost{background:none;border:1px solid var(--line);color:var(--muted);border-radius:8px;padding:6px 12px;font-size:.85rem;align-self:flex-start}
+.confirm{display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:.85rem;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){.coin{transition:none}}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>放纵餐决策币</h1>
+    <p class="sub">嘴馋的时候投一次，结果说了算。</p>
+  </header>
+
+  <section class="stage">
+    <div class="coin" id="coin" aria-live="polite">
+      <div class="face"><b>YES</b><span>放纵一顿</span></div>
+      <div class="face back"><b>NO</b><span>今天不吃</span></div>
+    </div>
+    <button class="flip" id="flipBtn" type="button">投币</button>
+    <div class="lock" id="lockText"></div>
+  </section>
+
+  <section class="card verdict" id="verdict" hidden>
+    <h2 id="vTitle"></h2>
+    <p id="vBody"></p>
+  </section>
+
+  <section class="card">
+    <div class="label">规则</div>
+    <dl class="rules">
+      <dt class="y">YES</dt><dd>吃一顿放纵餐，然后决策币锁定 7 天，这 7 天按原计划吃</dd>
+      <dt class="n">NO</dt><dd>这次不吃，决策币锁定 3 天</dd>
+    </dl>
+  </section>
+
+  <section class="card">
+    <div class="label">放纵餐守则</div>
+    <ul>
+      <li>只是一顿，不是一整天</li>
+      <li>先吃够蛋白质，再吃想吃的</li>
+      <li>第二天直接回到原计划，不饿肚子、不额外少吃来补</li>
+      <li>体重第二天涨 1–2 斤是水和糖原，3–4 天会回落</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <div class="label">记录</div>
+    <ul class="log" id="log"></ul>
+    <button class="ghost" id="resetBtn" type="button">清空记录</button>
+    <div class="confirm" id="confirmBox" hidden>
+      <span>确定清空记录和锁定？</span>
+      <button class="ghost" id="confirmYes" type="button">清空</button>
+      <button class="ghost" id="confirmNo" type="button">取消</button>
+    </div>
+  </section>
+</div>
+
+<script>
+const LOCK_DAYS={yes:7,no:3};
+const KEY="decision-coin-v1";
+const DAY=86400000;
+let state={history:[],lockUntil:0};
+try{const s=JSON.parse(localStorage.getItem(KEY)||"null");if(s&&Array.isArray(s.history))state=s;}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}}
+
+const coin=document.getElementById("coin"),btn=document.getElementById("flipBtn"),lockText=document.getElementById("lockText");
+let rot=0;
+
+function fmt(t){const d=new Date(t);return `${d.getMonth()+1}月${d.getDate()}日 ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;}
+
+function render(){
+  const now=Date.now();
+  const locked=state.lockUntil>now;
+  btn.disabled=locked;
+  if(locked){
+    const ms=state.lockUntil-now,d=Math.floor(ms/DAY),h=Math.floor(ms%DAY/3600000),m=Math.floor(ms%3600000/60000);
+    lockText.textContent=`锁定中，还剩 ${d} 天 ${h} 小时 ${m} 分 · ${fmt(state.lockUntil)} 可再投`;
+  }else lockText.textContent="现在可以投";
+  const log=document.getElementById("log");log.innerHTML="";
+  if(!state.history.length){log.innerHTML='<li><span style="color:var(--muted)">还没投过</span></li>';}
+  state.history.slice().reverse().forEach(r=>{
+    const li=document.createElement("li");
+    li.innerHTML=`<span>${fmt(r.t)}</span><span class="tag ${r.r}">${r.r==="yes"?"YES 放纵":"NO 不吃"}</span>`;
+    log.appendChild(li);
+  });
+  const last=state.history[state.history.length-1];
+  if(last&&locked)showVerdict(last.r);
+}
+
+function showVerdict(r){
+  const v=document.getElementById("verdict");v.hidden=false;v.className="card verdict "+r;
+  document.getElementById("vTitle").textContent=r==="yes"?"YES，去吃吧":"NO，这次不吃";
+  document.getElementById("vBody").textContent=r==="yes"
+    ?"吃一顿，好好享受，别内疚。吃完这顿就结束，接下来 7 天按原计划吃，不用额外节食。"
+    :"今天按计划吃。3 天后才能再投，想吃的那个可以先记下来。";
+}
+
+btn.addEventListener("click",()=>{
+  if(state.lockUntil>Date.now())return;
+  const r=crypto.getRandomValues(new Uint32Array(1))[0]%2===0?"yes":"no";
+  rot+=1440+(r==="yes"?0:180)-(rot%360);
+  coin.style.transform=`rotateY(${rot}deg)`;
+  btn.disabled=true;
+  const now=Date.now();
+  state.history.push({t:now,r});
+  state.lockUntil=now+LOCK_DAYS[r]*DAY;
+  save();
+  const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+  setTimeout(render,reduce?0:1650);
+});
+
+const box=document.getElementById("confirmBox"),resetBtn=document.getElementById("resetBtn");
+resetBtn.addEventListener("click",()=>{box.hidden=false;resetBtn.hidden=true;});
+document.getElementById("confirmNo").addEventListener("click",()=>{box.hidden=true;resetBtn.hidden=false;});
+document.getElementById("confirmYes").addEventListener("click",()=>{
+  state={history:[],lockUntil:0};save();box.hidden=true;resetBtn.hidden=false;
+  document.getElementById("verdict").hidden=true;render();
+});
+
+render();
+setInterval(render,60000);
+</script>
+<script>if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch(()=>{});}</script>
+</body>
+</html>
